@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 主題資源網 | 新生醫專圖書館</title>
+  <meta name="description" content="新生醫專圖書館 AI 主題資源網，整理 AI 基礎知識、電子書、實體館藏、影片、課程、工具與學術倫理。">
+  <link rel="stylesheet" href="styles.css?v=20260626a">
+</head>
+<body class="home-page" data-page="home">
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="回到首頁">
+      <img src="hsclogo.png" alt="新生醫專圖書館">
+      <span>新生醫專圖書館</span>
+    </a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav">選單</button>
+    <nav id="siteNav" class="site-nav" aria-label="主要導覽">
+      <a class="active" href="index.html">首頁</a>
+      <a href="books.html">館藏資源</a>
+      <a href="videos.html">教學影片</a>
+      <a href="courses.html">實用課程</a>
+      <a href="tools.html">AI工具</a>
+      <a href="index.html#ethics">AI倫理</a>
+      <a href="https://lib.hsc.edu.tw/" target="_blank" rel="noreferrer">圖書館首頁</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">AI Learning Resource Hub</p>
+        <h1>AI 主題資源網</h1>
+        <p class="lead">把入門觀念、圖書館館藏、電子書、精選影片、線上課程與常用工具整理成一個容易更新的學習入口。</p>
+        <div class="hero-tags" aria-label="網站特色">
+          <span>入門友善</span>
+          <span>館藏策展</span>
+          <span>影片自學</span>
+          <span>工具精選</span>
+        </div>
+        <div class="hero-actions">
+          <a class="button primary" href="books.html">瀏覽完整館藏</a>
+          <a class="button quiet" href="basics.html">從基礎開始</a>
+        </div>
+      </div>
+      <div class="hero-panel" aria-label="資源分類摘要">
+        <p class="panel-kicker">館藏策展摘要</p>
+        <div>
+          <strong id="statBooks">0</strong>
+          <span>本館藏與電子書</span>
+        </div>
+        <div>
+          <strong id="statVideos">0</strong>
+          <span>支教學影片</span>
+        </div>
+        <div>
+          <strong id="statTools">0</strong>
+          <span>個 AI 工具</span>
+        </div>
+        <a class="panel-link" href="#books">查看本頁精選</a>
+      </div>
+    </section>
+
+    <section class="curation-strip" aria-label="學習路徑">
+      <div>
+        <p class="eyebrow">Learning Path</p>
+        <h2>從認識 AI 到實際使用</h2>
+      </div>
+      <ol>
+        <li><span>理解</span>先掌握生成式 AI、提示詞與查證觀念。</li>
+        <li><span>閱讀</span>用館藏和電子書補足完整背景。</li>
+        <li><span>練習</span>透過影片與工具完成自己的任務。</li>
+      </ol>
+    </section>
+
+    <section id="basics" class="section">
+      <div class="section-heading with-action">
+        <div>
+          <p class="eyebrow">Start Here</p>
+          <h2>AI 基礎知識</h2>
+          <p>給第一次接觸 AI 的讀者一個清楚入口，先建立基本概念，再挑選合適資源深入學習。</p>
+        </div>
+        <a class="button small" href="basics.html">看完整入門教學</a>
+      </div>
+      <div id="basicsGrid" class="info-grid"></div>
+    </section>
+
+    <section id="books" class="section soft">
+      <div class="section-heading with-action">
+        <div>
+          <p class="eyebrow">Library Collection</p>
+          <h2>最新館藏與電子書</h2>
+          <p>首頁只放精選預覽，完整書單放在館藏分頁，方便瀏覽也讓首頁更清爽。</p>
+        </div>
+        <a class="button small" href="books.html">看完整館藏</a>
+      </div>
+      <div id="bookGrid" class="book-grid compact-grid"></div>
+    </section>
+
+    <section id="videos" class="section">
+      <div class="section-heading with-action">
+        <div>
+          <p class="eyebrow">Watch & Learn</p>
+          <h2>精選教學影片</h2>
+          <p>首頁保留幾支入門影片，完整影片清單另外放在分頁中。</p>
+        </div>
+        <a class="button small" href="videos.html">看完整影片</a>
+      </div>
+      <div id="videoGrid" class="video-grid compact-grid"></div>
+    </section>
+
+    <section id="courses" class="section soft">
+      <div class="section-heading with-action">
+        <div>
+          <p class="eyebrow">Self Learning</p>
+          <h2>自學課程與平台</h2>
+          <p>整理適合學生、教師與行政同仁自學的免費或開放課程。</p>
+        </div>
+        <a class="button small" href="courses.html">看完整課程</a>
+      </div>
+      <div id="courseGrid" class="resource-grid compact-grid"></div>
+    </section>
+
+    <section id="tools" class="section">
+      <div class="section-heading with-action">
+        <div>
+          <p class="eyebrow">Toolbox</p>
+          <h2>AI 工具庫</h2>
+          <p>依照用途快速挑選工具：搜尋、寫作、簡報、研讀、設計與程式輔助。</p>
+        </div>
+        <a class="button small" href="tools.html">看完整工具庫</a>
+      </div>
+      <div id="toolGrid" class="resource-grid compact-grid"></div>
+    </section>
+
+    <section id="ethics" class="section ethics">
+      <div class="section-heading">
+        <p class="eyebrow">Academic Integrity</p>
+        <h2>學術倫理與使用提醒</h2>
+        <p>AI 很適合協助發想、整理與練習，但不應取代查證、引用與個人判斷。</p>
+      </div>
+      <div id="ethicsGrid" class="info-grid"></div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="visit-counter" data-visit-counter>
+      <span>瀏覽人次</span>
+      <strong data-visit-number>--</strong>
+      <small data-visit-status>載入中</small>
+    </div>
+    <p>Copyright © 新生學校財團法人新生醫護管理專科學校</p>
+    <p>325 桃園市龍潭區中豐路高平段 418 號</p>
+    <p>TEL: (03)411-7578 轉 250 & 251 | E-Mail: <a href="mailto:lib@hsc.edu.tw">lib@hsc.edu.tw</a></p>
+  </footer>
+
+  <script src="data.js?v=20260626b"></script>
+  <script src="app.js?v=20260626b"></script>
+  <script src="counter-config.js?v=20260626a"></script>
+  <script src="counter.js?v=20260626a"></script>
+</body>
+</html>

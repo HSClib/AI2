@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 電子書推薦 | 新生醫專圖書館</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- 沿用主視覺設定 --- */
+        :root {
+            --primary-color: #006d77; 
+            --secondary-color: #83c5be;
+            --text-main: #2d3436;
+            --bg-body: #edf6f9;
+            --white: #ffffff;
+        }
+
+        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.6; }
+        a { text-decoration: none; transition: 0.3s; color: inherit; }
+        
+        /* --- 導航列 --- */
+        .top-bar { background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+        .logo-area { display: flex; align-items: center; gap: 15px; font-size: 1.3rem; font-weight: bold; color: var(--primary-color); cursor: pointer; }
+        .logo-area:hover { opacity: 0.8; }
+        .logo-area img { height: 50px; width: auto; } 
+        
+        /* 導覽連結樣式優化 */
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a { color: var(--text-main); margin-left: 15px; font-weight: 500; font-size: 0.9rem; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-color); }
+
+        /* --- 頁面標題區 --- */
+        .page-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+        }
+        .page-header h1 { margin: 0; font-size: 2.2rem; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .page-header p { opacity: 1; font-size: 1.1rem; max-width: 700px; margin: 0 auto; color: white; }
+
+        /* --- 容器 --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px 20px; }
+
+        /* --- 電子書網格 --- */
+        .book-grid { 
+            display: grid; 
+            /* 電腦版強制設定為 5 欄 */
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 25px; 
+            justify-content: center;
+        }
+        
+        .book-card { 
+            background: var(--white); 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+            transition: 0.3s; 
+            display: flex; 
+            flex-direction: column; 
+            text-align: center;
+            border: 1px solid #eee;
+        }
+        .book-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); border-color: var(--secondary-color); }
+        
+        .book-cover-link {
+            display: block;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            position: relative;
+            padding-top: 140%; /* 保持書本長寬比 */
+        }
+        
+        .book-cover-img { 
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: 0.3s;
+        }
+        .book-card:hover .book-cover-img { opacity: 0.95; transform: scale(1.03); }
+
+        .book-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .book-title { font-weight: bold; font-size: 1.05rem; color: #333; margin-bottom: 8px; line-height: 1.4; }
+        .book-author { color: #666; font-size: 0.9rem; margin-bottom: 15px; }
+        
+        .btn-read { 
+            display: block; 
+            width: 100%; 
+            padding: 10px 0; 
+            background-color: var(--primary-color); 
+            color: white; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            margin-top: auto; 
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .btn-read:hover { background-color: #00565e; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        /* 頁尾 */
+        footer { background: #2d3436; color: #ffffff; padding: 40px 0; margin-top: 60px; text-align: center; }
+        .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; text-align: center; line-height: 1.8; }
+        .footer-content p { margin: 5px 0; color: #ffffff; }
+        .footer-content a { color: #ffffff; text-decoration: none; border-bottom: 1px dashed #ffffff; }
+        .footer-content a:hover { color: var(--secondary-color); border-bottom-style: solid; }
+
+        /* --- RWD 響應式調整 --- */
+        @media (max-width: 1024px) {
+            .book-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+            .nav-links a { margin-left: 10px; font-size: 0.8rem; }
+        }
+
+        @media (max-width: 768px) {
+            .book-grid { 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+                gap: 15px; 
+            }
+            .book-title { font-size: 0.95rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-bar">
+        <div class="nav-container">
+            <a href="index.html" class="logo-area">
+                <img src="hsclogo.png" alt="Logo">
+                <span>新生醫專圖書館</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">首頁</a>
+                <a href="books.html" class="active">館藏資源</a>
+                <a href="videos.html">教學影片</a>
+                <a href="courses.html">實用課程</a>
+                <a href="tools.html">AI工具</a>
+                <a href="index.html#ethics">AI倫理</a>
+                <a href="https://lib.hsc.edu.tw/" target="_blank">圖書館首頁</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1><i class="fa-solid fa-book-bookmark"></i> AI 相關電子書推薦</h1>
+        <p>精選新生醫專 UDN 讀書館館藏，點擊封面即可立即借閱</p>
+    </div>
+
+    <div class="container">
+        <div class="book-grid">
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/229303" target="_blank" class="book-cover-link">
+                    <img src="book1.jpg" alt="快速搞懂AI人工智慧" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">快速搞懂AI人工智慧：我能運算你、取代你、終結你</div>
+                    <div class="book-author">作者：孫大千</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/229303" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/238006" target="_blank" class="book-cover-link">
+                    <img src="book2.jpg" alt="AI人工智慧最新浪潮" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI人工智慧最新浪潮—停不下來的列車</div>
+                    <div class="book-author">作者：孫大千</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/238006" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/236111" target="_blank" class="book-cover-link">
+                    <img src="book3.jpg" alt="AI生成影音創作" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI生成影音創作：超好用的文案、圖像、影片實戰技</div>
+                    <div class="book-author">作者：呂國泰 等</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/236111" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/245235" target="_blank" class="book-cover-link">
+                    <img src="book4.jpg" alt="AI時代的提問力" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI時代的提問力：Prompt Literacy</div>
+                    <div class="book-author">作者：岡瑞起 等</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/245235" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/245872" target="_blank" class="book-cover-link">
+                    <img src="book5.jpg" alt="職場人的生成式AI工作法" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">職場人的生成式AI工作法：哈佛商業評論 35 堂課</div>
+                    <div class="book-author">作者：艾麗莎‧法瑞 等</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/245872" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/242631" target="_blank" class="book-cover-link">
+                    <img src="book6.jpg" alt="用AI打造素人影響力" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">用AI打造素人影響力：商業定位與AI應用實戰課</div>
+                    <div class="book-author">作者：陳沛孺</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/242631" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/240508" target="_blank" class="book-cover-link">
+                    <img src="book7.jpg" alt="超實用AI技能工具箱" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">超實用AI技能工具箱：提升職場、教育與生活的技巧</div>
+                    <div class="book-author">作者：吳燦銘</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/240508" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/236166" target="_blank" class="book-cover-link">
+                    <img src="book8.jpg" alt="輝達之道" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">輝達之道：黃仁勳打造晶片帝國，引領AI浪潮的秘密</div>
+                    <div class="book-author">作者：金泰(Tae Kim)</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/236166" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/235758" target="_blank" class="book-cover-link">
+                    <img src="book9.jpg" alt="AI霸主" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI霸主：OpenAI、DeepMind與科技巨頭的競賽</div>
+                    <div class="book-author">作者：帕米‧奧森</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/235758" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <a href="https://reading.udn.com/udnlib/hsc/B/239860" target="_blank" class="book-cover-link">
+                    <img src="book10.jpg" alt="ChatGPT網路行銷" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">ChatGPT網路行銷：利用爆紅AI工具，創造精準商機</div>
+                    <div class="book-author">作者：吳燦銘</div>
+                    <a href="https://reading.udn.com/udnlib/hsc/B/239860" target="_blank" class="btn-read">
+                        <i class="fa-solid fa-book-open"></i> 立即閱讀
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>Copyright © 新生學校財團法人新生醫護管理專科學校</p>
+            <p>325桃園市龍潭區中豐路高平段418號</p>
+            <p>TEL: (03)411-7578 轉 250 & 251 | E-Mail: <a href="mailto:lib@hsc.edu.tw">lib@hsc.edu.tw</a></p>
+        </div>
+    </footer>
+
+</body>
+</html>

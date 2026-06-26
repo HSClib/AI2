@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 基礎知識入門 | 新生醫專圖書館</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- 沿用主視覺設定 --- */
+        :root {
+            --primary-color: #006d77; 
+            --secondary-color: #83c5be;
+            --text-main: #2d3436;
+            --bg-body: #edf6f9;
+            --white: #ffffff;
+            --box-bg: #e1eec3;
+        }
+
+        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.8; }
+        a { text-decoration: none; transition: 0.3s; color: inherit; }
+        
+        /* --- 導航列 --- */
+        .top-bar { background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+        .logo-area { display: flex; align-items: center; gap: 15px; font-size: 1.3rem; font-weight: bold; color: var(--primary-color); cursor: pointer; }
+        .logo-area:hover { opacity: 0.8; }
+        .logo-area img { height: 50px; width: auto; } 
+        
+        /* 導覽連結樣式優化 */
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a { color: var(--text-main); margin-left: 15px; font-weight: 500; font-size: 0.9rem; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-color); }
+
+        /* --- 頁面標題區 --- */
+        .page-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+        }
+        .page-header h1 { margin: 0; font-size: 2.2rem; margin-bottom: 10px;}
+        .page-header p { 
+            color: #ffffff; 
+            opacity: 1; 
+            font-size: 1.1rem; 
+            max-width: 700px; 
+            margin: 0 auto; 
+        }
+
+        /* --- 容器 --- */
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px 60px 20px; }
+
+        /* --- 文章區塊樣式 --- */
+        .content-section { background: var(--white); padding: 40px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 40px; }
+        
+        .section-title { 
+            color: var(--primary-color); 
+            font-size: 1.8rem; 
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 2px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h3 { color: #2c3e50; font-size: 1.4rem; margin-top: 30px; margin-bottom: 15px; border-left: 5px solid var(--secondary-color); padding-left: 10px; }
+        p { margin-bottom: 15px; font-size: 1.05rem; color: #444; }
+
+        /* --- 概念層次圖 --- */
+        .concept-box {
+            border: 2px solid #ccc;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+            background: rgba(255,255,255,0.5);
+        }
+        .concept-ai { border-color: #264653; background-color: #f1f8fa; }
+        .concept-ml { border-color: #2a9d8f; background-color: #eafaf1; margin: 20px; }
+        .concept-dl { border-color: #e9c46a; background-color: #fffbf0; margin: 20px; }
+        .concept-genai { border-color: #e76f51; background-color: #fff0eb; margin: 20px; border-style: dashed; }
+        
+        .label { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; display: inline-block; padding: 5px 15px; color: white; border-radius: 50px; }
+        .bg-ai { background: #264653; }
+        .bg-ml { background: #2a9d8f; }
+        .bg-dl { background: #e9c46a; color: #333; }
+        .bg-genai { background: #e76f51; }
+
+        /* --- 術語卡片網格 --- */
+        .term-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .term-card {
+            background: #f8f9fa;
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .term-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .term-title { font-weight: bold; font-size: 1.2rem; color: var(--primary-color); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .term-desc { font-size: 0.95rem; color: #555; }
+
+        .highlight-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .step-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .step-card {
+            background: #f8fbfc;
+            border: 1px solid #dcecef;
+            border-radius: 10px;
+            padding: 18px;
+        }
+        .step-card strong {
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+        .prompt-box {
+            background: #f6f8fa;
+            border: 1px solid #dde4ea;
+            border-radius: 10px;
+            padding: 18px;
+            margin: 14px 0;
+        }
+        .prompt-box code {
+            display: block;
+            white-space: pre-wrap;
+            font-family: "Microsoft JhengHei", sans-serif;
+            color: #243447;
+            line-height: 1.7;
+        }
+        .do-dont-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+        .do-box, .dont-box {
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .do-box { background: #eafaf1; border: 1px solid #bfe5cf; }
+        .dont-box { background: #fff0eb; border: 1px solid #f3c1b1; }
+        .check-list li {
+            margin-bottom: 10px;
+        }
+
+        /* 頁尾樣式 */
+        footer { 
+            background: #2d3436; 
+            color: #ffffff; 
+            padding: 40px 0; 
+            margin-top: 60px; 
+            text-align: center; 
+        }
+        .footer-content { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+            line-height: 1.8; 
+        }
+        .footer-content p { margin: 5px 0; color: #ffffff; }
+        .footer-content a { color: #ffffff; text-decoration: none; border-bottom: 1px dashed #ffffff; }
+        .visit-counter {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding: 10px 16px;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-weight: bold;
+        }
+        .visit-counter strong { font-size: 1.25rem; }
+        .visit-counter small { color: rgba(255,255,255,0.72); }
+
+        @media (max-width: 992px) {
+            .nav-links a { margin-left: 10px; font-size: 0.8rem; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .concept-ml, .concept-dl, .concept-genai { margin: 10px; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-bar">
+        <div class="nav-container">
+            <a href="index.html" class="logo-area">
+                <img src="hsclogo.png" alt="Logo">
+                <span>新生醫專圖書館</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">首頁</a>
+                <a href="books.html">館藏資源</a>
+                <a href="videos.html">教學影片</a>
+                <a href="courses.html">實用課程</a>
+                <a href="tools.html">AI工具</a>
+                <a href="index.html#ethics">AI倫理</a>
+                <a href="https://lib.hsc.edu.tw/" target="_blank">圖書館首頁</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>AI 基礎知識入門</h1>
+        <p>3 分鐘搞懂什麼是生成式 AI、LLM 與提示詞工程</p>
+    </div>
+
+    <div class="container">
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fa-solid fa-layer-group"></i>
+                一張圖看懂 AI 家族關係
+            </div>
+            <p>很多人會混淆 AI 的各種名詞。其實它們是「包含」的關係，就像俄羅斯娃娃一樣：</p>
+            
+            
+
+            <div class="concept-box concept-ai">
+                <span class="label bg-ai">人工智慧 (AI)</span>
+                <p>最外層的大圈圈。只要是讓機器展現出類似人類智慧的技術（如：下棋、辨識貓狗），都算 AI。</p>
+                
+                <div class="concept-box concept-ml">
+                    <span class="label bg-ml">機器學習 (Machine Learning)</span>
+                    <p>AI 的子集。不是讓人類寫死規則，而是讓機器透過大量的「數據」自己找出規則。</p>
+                    
+                    <div class="concept-box concept-dl">
+                        <span class="label bg-dl">深度學習 (Deep Learning)</span>
+                        <p>機器學習的一種。使用「類神經網絡」模仿人腦運作，能處理更複雜的影像和聲音。</p>
+                        
+                        <div class="concept-box concept-genai">
+                            <span class="label bg-genai">生成式 AI (Generative AI)</span>
+                            <p><strong>這就是現在最紅的！</strong>它不只是「辨識」現有東西，而是能「創造」出全新的文字、圖片或影片。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fa-solid fa-book-open"></i>
+                必懂關鍵術語 (Glossary)
+            </div>
+            <div class="term-grid">
+                <div class="term-card">
+                    <div class="term-title"><i class="fa-solid fa-server"></i> LLM (大型語言模型)</div>
+                    <div class="term-desc">
+                        Large Language Model。想像它是一個讀過網路上幾乎所有文章的「超級大腦」。ChatGPT、Claude、Gemini 都是 LLM 的一種。它們的核心能力是「預測下一個字」。
+                    </div>
+                </div>
+                <div class="term-card">
+                    <div class="term-title"><i class="fa-solid fa-keyboard"></i> Prompt (提示詞)</div>
+                    <div class="term-desc">
+                        你輸入給 AI 的指令。Prompt 寫得越好（包含角色、背景、任務、限制），AI 給出的答案就越精準。這就是為什麼現在流行「提示詞工程」。
+                    </div>
+                </div>
+                <div class="term-card">
+                    <div class="term-title"><i class="fa-solid fa-bug"></i> Hallucination (幻覺)</div>
+                    <div class="term-desc">
+                        AI 會「一本正經地胡說八道」。因為它只是在預測機率最高的字，並不真的理解事實。所以在學術引用時，<strong>務必查核來源</strong>。
+                    </div>
+                </div>
+                <div class="term-card">
+                    <div class="term-title"><i class="fa-solid fa-robot"></i> Token (標記)</div>
+                    <div class="term-desc">
+                        AI 計算文字的單位。一個 Token 不等於一個字。通常 1000 個 Tokens 約等於 750 個英文字，或 400-500 個中文字。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fa-solid fa-lightbulb"></i>
+                生成式 AI 是怎麼運作的？
+            </div>
+            <h3>文字接龍原理</h3>
+            <p>你可以把 ChatGPT 想像成一個超級厲害的「文字接龍」高手。當你問它問題時，它並不是在搜尋資料庫，而是在計算：</p>
+            <div style="background:#f1f3f5; padding:20px; border-radius:10px; font-family: monospace; color:#333;">
+                <p>輸入：「床前明月...」</p>
+                <p>AI 腦中預測機率：</p>
+                <ul style="list-style: none;">
+                    <li>👉 光 (95%)</li>
+                    <li>👉 亮 (2%)</li>
+                    <li>👉 輝 (1%)</li>
+                </ul>
+                <p>輸出：「光」 -> 然後再把「光」加進去，繼續預測下一個字。</p>
+            </div>
+            <p style="margin-top:15px">這就是為什麼它有時候會寫出很有創意，但完全不符合史實的內容（幻覺），因為它在意的是「語句通順」，而不是「事實正確」。</p>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fa-solid fa-route"></i>
+                第一次使用 AI，可以從這 4 步開始
+            </div>
+            <div class="step-list">
+                <div class="step-card">
+                    <strong>1. 先說明你要做什麼</strong>
+                    <p>不要只打「幫我寫」。請說清楚任務，例如：我要寫報告摘要、整理重點、設計活動文案。</p>
+                </div>
+                <div class="step-card">
+                    <strong>2. 補上背景</strong>
+                    <p>告訴 AI 對象、用途、字數、語氣。例如：給五專一年級學生看，語氣要簡單。</p>
+                </div>
+                <div class="step-card">
+                    <strong>3. 指定輸出格式</strong>
+                    <p>可以要求表格、條列、三段式、簡報大綱。格式越明確，越好直接使用。</p>
+                </div>
+                <div class="step-card">
+                    <strong>4. 再請它修改</strong>
+                    <p>第一次回答不滿意很正常。可以接著說：再短一點、口語一點、加例子、改成表格。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                好用提示詞公式
+            </div>
+            <p>新手可以先記這個簡單公式：</p>
+            <div class="prompt-box">
+                <code>請你扮演「角色」，
+幫我完成「任務」。
+背景是「使用情境」，
+對象是「誰要看」。
+請用「格式」輸出，
+語氣要「簡單、清楚、好懂」。</code>
+            </div>
+            <h3>範例 1：整理文章</h3>
+            <div class="prompt-box">
+                <code>請你扮演圖書館學習助理，幫我把下面這篇文章整理成重點。
+對象是第一次接觸 AI 的學生。
+請用 5 點條列，每點不超過 30 字，最後加上一句提醒。</code>
+            </div>
+            <h3>範例 2：做報告大綱</h3>
+            <div class="prompt-box">
+                <code>請幫我設計一份「生成式 AI 在護理學習的應用」報告大綱。
+對象是五專學生，報告時間 5 分鐘。
+請分成：開場、3 個重點、結論、參考資料查找方向。</code>
+            </div>
+            <h3>範例 3：改寫成簡單版</h3>
+            <div class="prompt-box">
+                <code>請把下面這段文字改寫成國中生也看得懂的版本。
+請保留原意，不要加入沒有根據的新資訊。
+請用短句和生活化例子說明。</code>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fa-solid fa-list-check"></i>
+                AI 適合幫你做什麼？
+            </div>
+            <div class="term-grid">
+                <div class="term-card">
+                    <div class="term-title"><i class="fa-solid fa-pen"></i> 寫作前發想</div>
+                    <div class="term-desc">想題目、列大綱、產生標題、把想法整理成段落。</div>
+                </div>
+                <div class="term-card">
+                    <div class="term-title"><i class="fa-solid fa-highlighter"></i> 摘要與重點</div>
+                    <div class="term-desc">把長文整理成重點、比較表、讀書摘要或簡報大綱。</div>
+                </div>
+                <div class="term-card">
+                    <div class="term-title"><i class="fa-solid fa-comments"></i> 練習對話</div>
+                    <div class="term-desc">練英文、面試問答、活動主持稿、課堂問答練習。</div>
+                </div>
+                <div class="term-card">
+                    <div class="term-title"><i class="fa-solid fa-table"></i> 整理成表格</div>
+                    <div class="term-desc">把零散資訊轉成表格、步驟、比較欄位或檢核清單。</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fa-solid fa-shield-halved"></i>
+                新手最容易踩到的坑
+            </div>
+            <div class="do-dont-grid">
+                <div class="do-box">
+                    <h3 style="margin-top:0;">建議這樣做</h3>
+                    <ul class="check-list">
+                        <li>把 AI 當成助理，不是最後答案。</li>
+                        <li>重要內容回到書籍、資料庫或官方網站查證。</li>
+                        <li>請 AI 說明「它不確定的地方」。</li>
+                        <li>要求列出資料查找方向，而不是直接相信引用。</li>
+                    </ul>
+                </div>
+                <div class="dont-box">
+                    <h3 style="margin-top:0;">避免這樣做</h3>
+                    <ul class="check-list">
+                        <li>不要直接複製 AI 產出的整份作業。</li>
+                        <li>不要輸入個資、病歷、成績、未公開研究資料。</li>
+                        <li>不要相信 AI 自動產生的書目一定存在。</li>
+                        <li>不要用 AI 取代自己的閱讀與判斷。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                AI 回答怎麼檢查？
+            </div>
+            <p>拿到 AI 回答後，可以用這份簡單檢核表：</p>
+            <ul class="check-list">
+                <li><strong>看來源：</strong>它有沒有提供可查到的來源？來源是不是官方、學術或圖書館資料庫？</li>
+                <li><strong>看時間：</strong>AI 可能不知道最新資訊，遇到法規、價格、工具功能要另外查。</li>
+                <li><strong>看語氣：</strong>講得很肯定不代表正確，越肯定越要查證。</li>
+                <li><strong>看細節：</strong>人名、年份、書名、研究結果最容易出錯。</li>
+                <li><strong>問第二次：</strong>可以追問「請指出哪些地方需要查證」或「請列出可能錯誤的地方」。</li>
+            </ul>
+        </div>
+
+        <div class="highlight-box">
+            <h3 style="margin-top:0; color:#856404;"><i class="fa-solid fa-circle-exclamation"></i> 給初學者的建議</h3>
+            <p>1. <strong>不要把 AI 當成搜尋引擎：</strong>它更像是你的「副駕駛」或「實習生」，適合幫你發想點子、潤飾文章、整理重點。</p>
+            <p>2. <strong>事實查核 (Fact Check)：</strong>對於醫療、法律、歷史等專業問題，AI 的回答僅供參考，必須回到圖書館資料庫或權威網站確認。</p>
+            <p>3. <strong>保護隱私：</strong>不要將病歷資料、個資或未發表的機密研究輸入到公開的 AI 對話框中。</p>
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="visit-counter" data-visit-counter>
+                <span>瀏覽人次</span>
+                <strong data-visit-number>--</strong>
+                <small data-visit-status>載入中</small>
+            </div>
+            <p>Copyright © 新生學校財團法人新生醫護管理專科學校</p>
+            <p>325桃園市龍潭區中豐路高平段418號</p>
+            <p>TEL: (03)411-7578 轉 250 & 251 | E-Mail: <a href="mailto:lib@hsc.edu.tw">lib@hsc.edu.tw</a></p>
+        </div>
+    </footer>
+
+    <script src="counter-config.js?v=20260626a"></script>
+    <script src="counter.js?v=20260626a"></script>
+</body>
+</html>

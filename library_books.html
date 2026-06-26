@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 實體館藏推薦 | 新生醫專圖書館</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- 沿用主視覺設定 --- */
+        :root {
+            --primary-color: #006d77; 
+            --secondary-color: #83c5be;
+            --text-main: #2d3436;
+            --bg-body: #edf6f9;
+            --white: #ffffff;
+            --tag-paper: #e76f51;
+        }
+
+        body { margin: 0; font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.6; }
+        a { text-decoration: none; transition: 0.3s; color: inherit; }
+        
+        /* --- 導航列 --- */
+        .top-bar { background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+        .logo-area { display: flex; align-items: center; gap: 15px; font-size: 1.3rem; font-weight: bold; color: var(--primary-color); cursor: pointer; }
+        .logo-area img { height: 50px; width: auto; } 
+        
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a { color: var(--text-main); margin-left: 15px; font-weight: 500; font-size: 0.9rem; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-color); }
+
+        .page-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+        }
+        .page-header h1 { margin: 0; font-size: 2rem; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .page-header p { opacity: 1; font-size: 1rem; max-width: 700px; margin: 0 auto; color: white; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px 20px; }
+
+        .book-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 20px; 
+            justify-content: center;
+        }
+        
+        .book-card { 
+            background: var(--white); 
+            border-radius: 8px; 
+            overflow: hidden; 
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06); 
+            transition: 0.3s; 
+            display: flex; 
+            flex-direction: column; 
+            border: 1px solid #eee;
+            position: relative;
+        }
+        .book-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.12); border-color: var(--secondary-color); }
+        
+        .badge-paper {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: var(--tag-paper);
+            color: white;
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            border-radius: 20px;
+            z-index: 10;
+            font-weight: bold;
+        }
+
+        /* --- 關鍵修正：封面圖區域 --- */
+        .book-cover-link {
+            display: flex; /* 使用 Flex */
+            justify-content: center; /* 水平置中 */
+            align-items: center; /* 垂直置中 */
+            background-color: #fff; 
+            height: 220px; /* 固定區域高度，避免圖片撐開或縮太小 */
+            padding: 15px; /* 增加四周內距，達成縮小圖片效果 */
+            overflow: hidden;
+        }
+        
+        .book-cover-img { 
+            max-width: 90%; /* 寬度限制 */
+            max-height: 90%; /* 高度限制 */
+            width: auto; /* 自動比例 */
+            height: auto; /* 自動比例 */
+            object-fit: contain; /* 確保內容不被裁切且完整顯示 */
+            transition: 0.3s;
+        }
+
+        .book-info { padding: 12px; flex-grow: 1; display: flex; flex-direction: column; text-align: left; background: #fff; }
+        .book-title { font-weight: bold; font-size: 0.85rem; color: #333; margin-bottom: 6px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.8em; }
+        
+        .book-details { font-size: 0.75rem; color: #666; margin-bottom: 10px; line-height: 1.4; }
+        .book-details b { color: var(--primary-color); }
+
+        .btn-read { 
+            display: block; 
+            width: 100%; 
+            padding: 6px 0; 
+            background-color: var(--secondary-color); 
+            color: white; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            margin-top: auto; 
+            text-decoration: none;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .btn-read:hover { background-color: var(--primary-color); }
+
+        footer { background: #2d3436; color: #ffffff; padding: 40px 0; margin-top: 60px; text-align: center; }
+        .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 20px; line-height: 1.8; }
+        .footer-content p { margin: 5px 0; color: #ffffff; }
+
+        @media (max-width: 1024px) { .book-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .book-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; } .nav-links { display: none; } }
+    </style>
+</head>
+<body>
+
+    <nav class="top-bar">
+        <div class="nav-container">
+            <a href="index.html" class="logo-area">
+                <img src="hsclogo.png" alt="Logo">
+                <span>新生醫專圖書館</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">首頁</a>
+                <a href="books.html" class="active">館藏資源</a>
+                <a href="videos.html">教學影片</a>
+                <a href="courses.html">實用課程</a>
+                <a href="tools.html">AI工具</a>
+                <a href="index.html#ethics">AI倫理</a>
+                <a href="https://lib.hsc.edu.tw/" target="_blank">圖書館首頁</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1><i class="fa-solid fa-book"></i> AI 實體圖書推薦</h1>
+        <p>圖書館精選紙本藏書，歡迎至圖書館借閱</p>
+    </div>
+
+    <div class="container">
+        <div class="book-grid">
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091548&max=&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook1.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 2.0 時代的新商業思維</div>
+                    <div class="book-details">
+                        <b>作者：</b>張榮貴<br>
+                        <b>出版社：</b>天下雜誌<br>
+                        <b>條碼：</b>A091548<br>
+                        <b>索書：</b>312.83/8764:2
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091548&max=&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092183&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook2.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AIGC 大型語言模型：個人應用到企業實戰立刻上手！</div>
+                    <div class="book-details">
+                        <b>作者：</b>王嘉濤、胡旭陽 等<br>
+                        <b>出版社：</b>深智數位<br>
+                        <b>條碼：</b>A092183<br>
+                        <b>索書：</b>312.83/8442
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092183&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092176&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook3.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AIGC 新紀元：洞察 ChatGPT 與 AI 產業革命</div>
+                    <div class="book-details">
+                        <b>作者：</b>劉通、陳夢曦<br>
+                        <b>出版社：</b>中國經濟出版社<br>
+                        <b>條碼：</b>A092176<br>
+                        <b>索書：</b>312.83/877
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092176&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091842&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook4.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 工具使用手冊：學會 AI 魔法讓你變身超人不再當麻瓜</div>
+                    <div class="book-details">
+                        <b>作者：</b>李婷婷 等<br>
+                        <b>出版社：</b>深智數位<br>
+                        <b>條碼：</b>A091842<br>
+                        <b>索書：</b>312.83/877
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091842&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092297&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook5.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 生成技術實戰手冊（第 2 版）</div>
+                    <div class="book-details">
+                        <b>作者：</b>陳國益<br>
+                        <b>出版社：</b>全華圖書<br>
+                        <b>條碼：</b>A092297<br>
+                        <b>索書：</b>312.83/8774
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092297&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091902&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook6.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 成功學</div>
+                    <div class="book-details">
+                        <b>作者：</b>陳安之<br>
+                        <b>出版社：</b>創見文化<br>
+                        <b>條碼：</b>A091902<br>
+                        <b>索書：</b>177.2/873
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091902&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092321&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook7.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 自動化流程超 Easy：不寫程式 No code 也能聰明幹大事</div>
+                    <div class="book-details">
+                        <b>作者：</b>施威銘研究室<br>
+                        <b>出版社：</b>旗標科技<br>
+                        <b>條碼：</b>A092321<br>
+                        <b>索書：</b>494.3/8437
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092321&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092201&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook8.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 音效、語音與音樂：設計創意影片新時代</div>
+                    <div class="book-details">
+                        <b>作者：</b>洪錦魁<br>
+                        <b>出版社：</b>深智數位<br>
+                        <b>條碼：</b>A092201<br>
+                        <b>索書：</b>312.83/8384
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092201&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092172&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook9.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 時代的認知邊界：人類能否超越自己的創造物</div>
+                    <div class="book-details">
+                        <b>作者：</b>蔡恆進、蔡天琪 等<br>
+                        <b>出版社：</b>沐燁文化<br>
+                        <b>條碼：</b>A092172<br>
+                        <b>索書：</b>312.83/8463
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092172&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091840&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook10.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 時代錢滾錢：量化自動交易躺著賺</div>
+                    <div class="book-details">
+                        <b>作者：</b>李必文<br>
+                        <b>出版社：</b>深智數位<br>
+                        <b>條碼：</b>A091840<br>
+                        <b>索書：</b>563.5/8430
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091840&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092298&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook11.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 商業應用與實務</div>
+                    <div class="book-details">
+                        <b>作者：</b>廖文華<br>
+                        <b>出版社：</b>碁峰資訊<br>
+                        <b>條碼：</b>A092298<br>
+                        <b>索書：</b>312.83/8654
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092298&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091845&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook12.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 提示工程師的 16 堂關鍵必修課（第二版）</div>
+                    <div class="book-details">
+                        <b>作者：</b>吳燦銘<br>
+                        <b>出版社：</b>碁峰資訊<br>
+                        <b>條碼：</b>A091845<br>
+                        <b>索書：</b>312.83 877
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091845&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091841&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook13.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 視覺：最強入門邁向頂尖高手王者歸來</div>
+                    <div class="book-details">
+                        <b>作者：</b>洪錦魁<br>
+                        <b>出版社：</b>深智數位<br>
+                        <b>條碼：</b>A091841<br>
+                        <b>索書：</b>312.83 8384-2
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091841&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091906&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook14.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 影片製作工具箱（第二版）</div>
+                    <div class="book-details">
+                        <b>作者：</b>鄭苑鳳<br>
+                        <b>出版社：</b>博碩文化<br>
+                        <b>條碼：</b>A091906<br>
+                        <b>索書：</b>312.83 8465
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091906&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092381&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook15.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">AI 霸主：OpenAI、DeepMind 與科技巨頭顛覆世界的競賽</div>
+                    <div class="book-details">
+                        <b>作者：</b>帕米．奧森 (Parmy Olson)<br>
+                        <b>出版社：</b>天下文化<br>
+                        <b>條碼：</b>A092381<br>
+                        <b>索書：</b>312.83 8336
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092381&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091848&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook16.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">ChatGPT 4 Omni 領軍：全面探索生成式 AI 的無限可能</div>
+                    <div class="book-details">
+                        <b>作者：</b>洪錦魁<br>
+                        <b>出版社：</b>深智數位<br>
+                        <b>條碼：</b>A091848<br>
+                        <b>索書：</b>312.835 8384
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091848&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091909&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook17.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">ChatGPT x Ionic x Angular 全方位技術整合實戰</div>
+                    <div class="book-details">
+                        <b>作者：</b>陳碩元<br>
+                        <b>出版社：</b>碁峰資訊<br>
+                        <b>條碼：</b>A091909<br>
+                        <b>索書：</b>312.835 8734
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091909&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091849&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook18.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">ChatGPT 4 實戰應用：讓 AI 成為你的超級助手！</div>
+                    <div class="book-details">
+                        <b>作者：</b>張成龍<br>
+                        <b>出版社：</b>碁峰資訊<br>
+                        <b>條碼：</b>A091849<br>
+                        <b>索書：</b>312.835 873
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091849&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A092185&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook19.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">ChatGPT 全新功能：開創 AI 無限可能</div>
+                    <div class="book-details">
+                        <b>作者：</b>洪錦魁<br>
+                        <b>出版社：</b>深智數位<br>
+                        <b>條碼：</b>A092185<br>
+                        <b>索書：</b>312.835 8384-2
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A092185&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <span class="badge-paper">紙本</span>
+                <a href="http://163.25.34.60:8080/toread/opac/search?q=A091498&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="book-cover-link">
+                    <img src="AIbook20.jpg" alt="封面" class="book-cover-img">
+                </a>
+                <div class="book-info">
+                    <div class="book-title">ChatGPT 對課程和教學帶來的挑戰與契機</div>
+                    <div class="book-details">
+                        <b>作者：</b>黃旭鈞 等<br>
+                        <b>出版社：</b>心理出版社<br>
+                        <b>條碼：</b>A091498<br>
+                        <b>索書：</b>524.3 8344
+                    </div>
+                    <a href="http://163.25.34.60:8080/toread/opac/search?q=A091498&max=0&view=CONTENT&level=all&material_type=all&location=0" target="_blank" class="btn-read">查看館藏</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>Copyright © 新生學校財團法人新生醫護管理專科學校</p>
+            <p>325桃園市龍潭區中豐路高平段418號</p>
+            <p>TEL: (03)411-7578 轉 250 & 251 | E-Mail: lib@hsc.edu.tw</p>
+        </div>
+    </footer>
+
+</body>
+</html>
