@@ -78,7 +78,8 @@ window.AI_RESOURCE_DATA = {
     { id: "5zunrr5fV3s", title: "Gemini in Chrome 全攻略｜解鎖 12 招玩法", channel: "T客邦影新聞" },
     { id: "W5ymBPi53Tw", title: "新增影片 4", channel: "YouTube" },
     { id: "KuA6AeomZB8", title: "新增影片 5", channel: "YouTube" },
-    { id: "c_F5Y8Di2hw", title: "新增影片 6", channel: "YouTube" }
+    { id: "c_F5Y8Di2hw", title: "新增影片 6", channel: "YouTube" },
+    { id: "3Dfp8PdPw5o", title: "長輩都要會的AI應用，用ChatGPT+ Gemini 讓生活更方便片", channel: "大有牧森 Austin Chou" }
   ],
   courses: [
     { title: "Taiwan MOOCs", tag: "教育部", text: "國內大學開放式課程平台，可搜尋人工智慧、資訊素養與通識課程。", url: "https://moocs.moe.edu.tw/" },
